@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="portal-mysql-no-app-builder" type="MavenRunConfiguration" factoryName="Maven">
+  <configuration default="false" name="entando7.4-no-app-builder" type="MavenRunConfiguration" factoryName="Maven">
     <MavenSettings>
       <option name="myGeneralSettings" />
       <option name="myRunnerSettings">
@@ -7,25 +7,30 @@
           <option name="delegateBuildToMaven" value="false" />
           <option name="environmentProperties">
             <map>
-              <entry key="PORTDB_DRIVER" value="mysql" />
-              <entry key="SERVDB_DRIVER" value="mysql" />
+              <entry key="APPBUILDERINTEGRATIONENABLED" value="true" />
               <entry key="CDS_ENABLED" value="false" />
               <entry key="CDS_PATH" value="/api/v1" />
               <entry key="CDS_PRIVATE_URL" value="http://172.17.0.1:18080/" />
               <entry key="CDS_PUBLIC_PATH" value="/public" />
               <entry key="CDS_PUBLIC_URL" value="http://portal.entando.local/cds" />
+              <entry key="ENTANDO_ENGINE_WEB_CONTEXT" value="/" />
               <entry key="ENTANDO_TENANTS" value="[]" />
+              <entry key="ENTANDO_VIRTUAL_CONTEXTS" value="" />
+              <entry key="ENTANDO_WEB_CONTEXT" value="/" />
               <entry key="KEYCLOAK_AUTH_URL" value="http://portal.entando.local/auth" />
               <entry key="KEYCLOAK_CLIENT_ID" value="external" />
               <entry key="KEYCLOAK_CLIENT_SECRET" value="external" />
               <entry key="KEYCLOAK_ENABLED" value="true" />
               <entry key="KEYCLOAK_PUBLIC_CLIENT_ID" value="webapp" />
               <entry key="KEYCLOAK_REALM" value="entando-dev" />
+              <entry key="LOG_LEVEL" value="INFO" />
+              <entry key="PORTDB_DRIVER" value="postgresql" />
               <entry key="REDIS_ACTIVE" value="false" />
               <entry key="REDIS_ADDRESS" value="redis://172.17.0.1:16379" />
               <entry key="REDIS_SESSION_ACTIVE" value="false" />
-              <entry key="LOG_LEVEL" value="INFO" />
               <entry key="ROOT_LOG_LEVEL" value="INFO" />
+              <entry key="SERVDB_DRIVER" value="postgresql" />
+              <entry key="SERVER_SERVLET_CONTEXT_PATH" value="/" />
             </map>
           </option>
           <option name="jreName" value="#USE_PROJECT_JDK" />
@@ -59,9 +64,9 @@
               <option value="-DskipLicenseDownload" />
               <option value="-Dlicense.skipDownloadLicenses" />
               <option value="-DappBuilderBaseURL=http://portal.entando.local/app-builder/" />
-              <option value="-DapplicationBaseURL=http://portal.entando.local/entando-de-app" />
-              <option value="-DresourceRootURL=/entando-de-app/resources/" />
-              <option value="-DprotectedResourceRootURL=/entando-de-app/protected/" />
+              <option value="-DapplicationBaseURL=http://portal.entando.local" />
+              <option value="-DresourceRootURL=/resources/" />
+              <option value="-DprotectedResourceRootURL=/protected/" />
               <option value="-Dcors.enabled=false" />
               <option value="-Dcors.access.control.allow.origin=*" />
               <option value="-Dcors.access.control.allow.credentials=false" />
@@ -76,19 +81,19 @@
               <option value="-Ddb.restore.enabled=false" />
               <option value="-Ddb.environment=production" />
               <option value="-DskipDatabaseImage=false" />
-              <option value="-Dprofile.database.driverClassName=com.mysql.cj.jdbc.Driver" />
+              <option value="-Dprofile.database.driverClassName=org.postgresql.Driver" />
               <option value="-Dportdb.jndi=java:/jdbc/servDataSource" />
-              <option value="-Dportdb.url=jdbc:mysql://172.17.0.1:13306/port" />
-              <option value="-Dportdb.username=root" />
-              <option value="-Dportdb.password=password" />
-              <option value="-Dportdb.driverClassName=com.mysql.cj.jdbc.Driver" />
-              <option value="-DportDataSourceClassName=com.mysql.cj.jdbc.Driver" />
+              <option value="-Dportdb.url=jdbc:postgresql://172.17.0.1:15432/entando?currentSchema=port" />
+              <option value="-Dportdb.username=port" />
+              <option value="-Dportdb.password=port" />
+              <option value="-Dportdb.driverClassName=org.postgresql.Driver" />
+              <option value="-DportDataSourceClassName=org.postgresql.Driver" />
               <option value="-Dservdb.jndi=java:/jdbc/portDataSource" />
-              <option value="-Dservdb.url=jdbc:mysql://172.17.0.1:13306/serv" />
-              <option value="-Dservdb.username=root" />
-              <option value="-Dservdb.password=password" />
-              <option value="-Dservdb.driverClassName=com.mysql.cj.jdbc.Driver" />
-              <option value="-DservDataSourceClassName=com.mysql.cj.jdbc.Driver" />
+              <option value="-Dservdb.url=jdbc:postgresql://172.17.0.1:15432/entando?currentSchema=serv" />
+              <option value="-Dservdb.username=serv" />
+              <option value="-Dservdb.password=serv" />
+              <option value="-Dservdb.driverClassName=org.postgresql.Driver" />
+              <option value="-DservDataSourceClassName=org.postgresql.Driver" />
               <option value="-DredisActive=false" />
               <option value="-DredisAddress=redis://172.17.0.1:16379" />
               <option value="-DSolarAddress=" />

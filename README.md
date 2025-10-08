@@ -8,7 +8,7 @@
   - [Versioni di riferimento](#versioni-di-riferimento)
 
 - [Prerequisiti](#prerequisiti)
-  - [Definizione Prefisso Container](#definizione-prefisso-container)
+  - [Definizione Environment](#definizione-environment)
   - [Definizione Domini](#definizione-domini)
   - [Configurazione Domini](#configurazione-domini)
   - [Porte in uso](#porte-in-uso)
@@ -61,11 +61,19 @@ Gli obbiettivi di questo progetto sono:
 
 ## Prerequisiti  ##
 
-### Definizione Prefisso Container ###
+### Definizione Environment ###
 
-Il container ha come prefisso `portal`.  
-Tale prefisso è definito nel file [.env](.env).  
-Tale prefisso influenza i container docker creati.  
+Il file di partenza della configurazione è il file [.env](.env).  
+In tale file sono presenti i seguenti parametri:  
+- `COMPOSE_PROJECT_NAME`: il nome del progetto, che è usato come prefisso dei container. Di default è `portal`.
+- `COMPOSE_FILE`: il nome del file con la configurazione del docker-compose
+
+Se si vuole cnfigurare un nuovo ambiente, ad esempio per una particolare versione di entando o un nuovo progetto, 
+occorre partire da qui.  
+Un caso d'uso classico è quello di una versione particolare di entando, o un progetto.  
+Sarà buona norma creare un nuovo file docker-compose, e configurarlo come valore del parametro `COMPOSE_FILE` del file [.env](.env).
+
+Il docker-compose andrà configurato opportunamente nei volumi, in modo da non andare in conflitto con la configurazione degli altri progetti.  
 
 
 > [Vai all'indice](#indice)
@@ -140,7 +148,7 @@ Questo sistema fa uso delle seguenti porte:
    - [nginx.conf](_nginx/nginx.conf):  
     `proxy_pass http://172.17.0.1:8080;`
  - **15432**: porta utilizzata dal container di `postgres`, definita in:  
-   - [docker compose](docker-compose.yml)
+   - [docker compose](docker-compose-default.yml)
    - [comando di avvio](#comando-di-avvio):  
 ```
 -Dportdb.url=jdbc:postgresql://localhost:15432/entando?currentSchema=port
@@ -149,21 +157,21 @@ Questo sistema fa uso delle seguenti porte:
 ```
 
  - **16379**: porta utilizzata dal container di `redis`, definita in:  
-   - [docker compose](docker-compose.yml)
+   - [docker compose](docker-compose-default.yml)
    - [comando di avvio](#comando-di-avvio):  
 ```
 -DredisAddress=redis://localhost:16379
 ```
 
  - **18080**: porta utilizzata dal container di `cds`, definita in:  
-   - [docker compose](docker-compose.yml)
+   - [docker compose](docker-compose-default.yml)
    - [comando di avvio](#comando-di-avvio):  
 ```
 -DCDS_PRIVATE_URL=http://localhost:18080/
 ```
 
  - **80**: porta utilizzata dal container di `nginx`, definita in:  
-   - [docker compose](docker-compose.yml)
+   - [docker compose](docker-compose-default.yml)
 
 
 
@@ -226,7 +234,7 @@ Oppure utilizzando lo script:
 
 ### Postgres ###
 
-Il [docker-compose](docker-compose.yml) crea una istanza di PostgreSQL contenente un DB `entando` inizializzato coi seguenti schema:  
+Il [docker-compose](docker-compose-default.yml) crea una istanza di PostgreSQL contenente un DB `entando` inizializzato coi seguenti schema:  
 - port
 - serv
 - keycloak
@@ -252,7 +260,7 @@ Comando di rigenerazione container:
 
 ### MySQL ###
 
-Il [docker-compose](docker-compose.yml) crea una istanza di MySQL contenente i seguenti DB:
+Il [docker-compose](docker-compose-default.yml) crea una istanza di MySQL contenente i seguenti DB:
 - port
 - serv
 - keycloak
@@ -344,7 +352,7 @@ Comando di rigenerazione container:
 
 **** IMPORTANTE! ****  
 Avviato Keycloak la prima volta, occorre estrapolare la "Public Key" da ogni REALM, 
-e inserirla nel relativo parametro di environment del [docker-compose](docker-compose.yml).  
+e inserirla nel relativo parametro di environment del [docker-compose](docker-compose-default.yml).  
 Le chiavi possono essere recuperate nei seguenti link:
 - [entando-dev](http://portal.entando.local/auth/admin/master/console/#/realms/entando-dev/keys)
 - [entando-t1](http://portal.entando.local/auth/admin/master/console/#/realms/entando-t1/keys)
@@ -453,7 +461,11 @@ Per configurare l'avvio di Entando occorre:
 - definire un name adatto (es: il nome del progetto)
 - selezionare come `Working Directory` la cartella `webapp`
 - assicurarsi che la `JRE` in uso sia la `11`
-- definire nel campo `Run` come [segue](#configurazione-di-run)
+- definire nel campo `Run` come in questo [esempio](.run/parametri-environment.md) opportunamente modificato (in base a quanto definito nel resto del documento)
+- in Java Options, abilitare Environment Variables e valorizzare il campo secondo questo [esempio](.run/parametri-avvio.md) opportunamente modificato (in base a quanto definito nel resto del documento)
+
+In alternativa si possono usare e modificare i file di esempio contenuti dentro la cartella [.run](.run) 
+ed elencati nel [paragrafo seguente](#configurazione-di-run)
 
 
 ##### Configurazione di Run #####
@@ -469,160 +481,6 @@ Sono inoltre presenti le configurazioni anche per MySQL:
 - [Portale senza Multitenancy](.run/mysql/portal-mysql-no-tenants.run.xml)
 - [Portale senza App Builder](.run/mysql/portal-mysql-no-app-builder.run.xml)
 - [Portale senza Keycloak](.run/mysql/portal-mysql-no-keycloak.run.xml)
-
-
-Di seguito una guida su come configurare manualmente una Run Configuration su IntelliJ.  
-Definire nel campo `Run` il seguente comando, opportunamente modificato (in base a quanto definito nel resto del documento):
-
-```
-clean package jetty:run-war 
--Djetty.http.port=8080 
--Pjetty-local 
--Dspring.profiles.active=swagger
--Djetty.forwarded=true
--Pkeycloak 
--DskipDocker=true 
--DskipTests 
--DskipLicenseDownload 
--Dlicense.skipDownloadLicenses
--DappBuilderBaseURL=http://portal.entando.local/app-builder/
--DapplicationBaseURL=http://portal.entando.local/entando-de-app 
--DresourceRootURL=/entando-de-app/resources/ 
--DprotectedResourceRootURL=/entando-de-app/protected/ 
--Dcors.enabled=false 
--Dcors.access.control.allow.origin=* 
--Dcors.access.control.allow.credentials=false
--DappBuilderIntegrationEnabled=true
-
--Dkeycloak.enabled=true
--Dkeycloak.auth.url=http://portal.entando.local/auth
--Dkeycloak.realm=entando-dev
--Dkeycloak.client.id=external
--Dkeycloak.client.secret=external
--Dkeycloak.public.client.id=webapp
-
--Ddb.migration.strategy=AUTO
--Ddb.restore.enabled=false 
--Ddb.environment=production
--DskipDatabaseImage=false
--Dprofile.database.driverClassName=org.postgresql.Driver
--Dportdb.jndi=java:/jdbc/servDataSource
--Dportdb.url=jdbc:postgresql://localhost:15432/entando?currentSchema=port
--Dportdb.username=port
--Dportdb.password=port
--Dportdb.driverClassName=org.postgresql.Driver
--DportDataSourceClassName=org.postgresql.Driver
--Dservdb.jndi=java:/jdbc/portDataSource
--Dservdb.url=jdbc:postgresql://localhost:15432/entando?currentSchema=serv
--Dservdb.username=serv
--Dservdb.password=serv
--Dservdb.driverClassName=org.postgresql.Driver
--DservDataSourceClassName=org.postgresql.Driver
--DredisActive=true
--DredisAddress=redis://localhost:16379
--DSolarAddress=
--Dfile.upload.maxSize=25000000
--Dorg.entando.deepDebug=
--DENTANDO_FORCE_SKIP_DB_INIT=true
-```
-
-
-> [Vai all'indice](#indice)
-
----
-
-
-##### Parametri di Environment #####
-
-Parametri di environment:
-
-```
-PORTDB_DRIVER=postgresql;
-SERVDB_DRIVER=postgresql;
-
-CDS_ENABLED=true;
-CDS_PATH=/api/v1;
-CDS_PRIVATE_URL=http://localhost:18080/;
-CDS_PUBLIC_URL=http://portal.entando.local/cds;
-CDS_PUBLIC_PATH=/public;
-
-KEYCLOAK_ENABLED=true;
-KEYCLOAK_AUTH_URL=http://portal.entando.local/auth;
-KEYCLOAK_REALM=entando-dev;
-KEYCLOAK_CLIENT_ID=external;
-KEYCLOAK_CLIENT_SECRET=external;
-KEYCLOAK_PUBLIC_CLIENT_ID=webapp;
-
-REDIS_ACTIVE=true;
-REDIS_SESSION_ACTIVE=false;
-REDIS_ADDRESS=redis://172.17.0.1:16379;
-
-ENTANDO_TENANTS=[
-    {
-        "tenantCode": "t1",
-        "fqdns": "t1.entando.local",
-        "kcEnabled": true,
-        "kcAuthUrl": "http://t1.entando.local/auth",
-        "kcRealm": "entando-t1",
-        "kcClientId": "external",
-        "kcClientSecret": "external",
-        "kcPublicClientId": "webapp",
-        "kcSecureUris": "",
-        "kcDefaultAuthorizations": "",
-        "dbDriverClassName": "org.postgresql.Driver",
-        "dbUrl": "jdbc:postgresql://localhost:15432/entando?currentSchema=t1",
-        "dbUsername": "t1",
-        "dbPassword": "t1",
-        "cdsEnabled": true,
-        "cdsPublicUrl": "http://t1.entando.local/cds",
-        "cdsPrivateUrl": "http://localhost:18081/",
-        "cdsPath": "api/v1", 
-        "dbMigrationStrategy": "AUTO"
-    }, 
-    {
-        "tenantCode": "t2",
-        "fqdns": "t2.entando.local",
-        "kcEnabled": true,
-        "kcAuthUrl": "http://t2.entando.local/auth",
-        "kcRealm": "entando-t2",
-        "kcClientId": "external",
-        "kcClientSecret": "external",
-        "kcPublicClientId": "webapp",
-        "kcSecureUris": "",
-        "kcDefaultAuthorizations": "",
-        "dbDriverClassName": "org.postgresql.Driver",
-        "dbUrl": "jdbc:postgresql://localhost:15432/entando?currentSchema=t2",
-        "dbUsername": "t2",
-        "dbPassword": "t2",
-        "cdsEnabled": true,
-        "cdsPublicUrl": "http://t2.entando.local/cds",
-        "cdsPrivateUrl": "http://localhost:18082/",
-        "cdsPath": "api/v1", 
-        "dbMigrationStrategy": "AUTO"
-    }, 
-    {
-        "tenantCode": "t3",
-        "fqdns": "t3.entando.local",
-        "kcEnabled": true,
-        "kcAuthUrl": "http://t3.entando.local/auth",
-        "kcRealm": "entando-t3",
-        "kcClientId": "external",
-        "kcClientSecret": "external",
-        "kcPublicClientId": "webapp",
-        "kcSecureUris": "",
-        "kcDefaultAuthorizations": "",
-        "dbDriverClassName": "org.postgresql.Driver",
-        "dbUrl": "jdbc:postgresql://localhost:15432/entando?currentSchema=t3",
-        "dbUsername": "t3",
-        "dbPassword": "t3",
-        "cdsEnabled": true,
-        "cdsPublicUrl": "http://t3.entando.local/cds",
-        "cdsPrivateUrl": "http://localhost:18083/",
-        "cdsPath": "api/v1", 
-        "dbMigrationStrategy": "AUTO"
-    }
-];
-```
 
 
 > [Vai all'indice](#indice)

@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN git clone -b release/7.3 https://github.com/entando/app-builder/ . 
 
-COPY .env.local /app/
+COPY .env.local /app/.env.local
 
 RUN npm install
 RUN npm run build

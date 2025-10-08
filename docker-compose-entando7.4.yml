@@ -1,0 +1,166 @@
+version: '3.3'
+services:
+  postgresql:
+    build: _postgres
+    hostname: postgres
+    environment:
+      POSTGRES_MULTIPLE_SCHEMAS: port:port:port, serv:serv:serv, keycloak:keycloak:keycloak, digital_exchange:digital_exchange:digital_exchange, t1:t1:t1, t2:t2:t2, t3:t3:t3
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_ADMIN_PASSWORD: postgres
+      POSTGRES_DB: entando
+    volumes:
+      - ./_volumes/entando7.4/postgres-data:/var/lib/postgresql/data
+    ports:
+      - "15432:5432"
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.4
+    hostname: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    volumes:
+      - ./_mysql/db-init.sql:/docker-entrypoint-initdb.d/db-init.sql
+      - ./_volumes/entando7.4/mysql-data:/var/lib/mysql
+    ports:
+      - "13306:3306"
+    restart: unless-stopped
+
+  keycloak:
+    image: entando/entando-keycloak:7.3.0
+    hostname: keycloak
+    command: [
+      '-b',
+      '0.0.0.0',
+      '-Dkeycloak.profile.feature.scripts=enabled',
+      '-Dkeycloak.profile.feature.upload_scripts=enabled',
+      '-Dkeycloak.migration.action=import',
+      '-Dkeycloak.migration.provider=dir',
+      '-Dkeycloak.migration.dir=/opt/jboss/keycloak/realm-config',
+      '-Dkeycloak.migration.strategy=IGNORE_EXISTING', # use 'OVERWRITE_EXISTING' instead if you want to reset your current configuration
+      '-Djboss.socket.binding.port-offset=1000',
+      '-Dhttp-enabled=true'
+    ]
+    volumes:
+      - ./_keycloak/realm-config:/opt/jboss/keycloak/realm-config
+      - ./_keycloak/deployments:/opt/jboss/keycloak/standalone/deployments
+      - ./_volumes/entando7.4/keycloak-db:/opt/jboss/keycloak/standalone/data
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=adminadmin
+      - DB_VENDOR=h2
+      - SERVER_SERVLET_CONTEXT_PATH=/auth
+      - PROXY_ADDRESS_FORWARDING=true
+    restart: unless-stopped
+    ports:
+      - "9080:8080"
+
+  redis:
+    image: "redis:7.4"
+    ports:
+      - "16379:6379"
+    volumes:
+      - ./_volumes/entando7.4/redis-data:/data
+    restart: unless-stopped
+
+  app-builder:
+    build:
+      context: _app-builder/entando7.4
+      dockerfile: Dockerfile
+    hostname: app-builder
+    environment:
+      DOMAIN: /entando-de-app
+    restart: unless-stopped
+
+  cds:
+    image: entando/cds:1.0.4-fix.1
+    hostname: cds
+    environment:
+      - CORS_ALLOWED_ORIGIN_END_WITH=.entando.local
+      - CORS_ALLOWED_ORIGIN=All
+      - RUST_LOG=actix_web=debug,actix_server=debug,actix_web_middleware_keycloak_auth=debug
+      - RUST_BACKTRACE=1
+      - KEYCLOAK_PUBLIC_KEY= |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgBEHv1+DVx+ig/YyjD8xpA73zOE5FH78TyRihC612OwDLYY9obOPPQd6hXNVKwBDJx1JaulFG3I6AMZtpeGsMdDCBSXF1u4+X0017EgDWYYEySDzHYMOLjBq2+UjHoAt+AO4Q/KxDCcQu2S2jtvH3D3VL4zE0etboeR2VAmoCJdWH056VEyD93NTf/689LcPzcKKBvOJm/mq15NPEHGpjkA/dYsfGiw1PuqjFHSJ9Ji7I7+EzJlr50T9iWBrx/fsd1MWdXJKpbD61I+FajthAtyqf2tvzbsE8NsMnT/A7DS8oynykmTzDKEQTkHkw4cCgG5OmOqbOQimUo/++wY/nQIDAQAB
+        -----END PUBLIC KEY-----
+    volumes:
+      - ./_volumes/entando7.4/cds-storage/default:/entando-data
+    ports:
+      - 18080:8080
+      - 38080:8081
+    restart: unless-stopped
+
+  cds-t1:
+    image: entando/cds:1.0.4-fix.1
+    hostname: cds-t1
+    environment:
+      - CORS_ALLOWED_ORIGIN_END_WITH=.entando.local
+      - CORS_ALLOWED_ORIGIN=All
+      - RUST_LOG=actix_web=debug,actix_server=debug,actix_web_middleware_keycloak_auth=debug
+      - RUST_BACKTRACE=1
+      - KEYCLOAK_PUBLIC_KEY= |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmk/3MPFLmyn5ZkdEuy5KGBbR9ZZ4N30AGLe7xf0e7fUJla4ras8sIzXR/VNYRw9b6WRxwZXqAd9JjjYL02KDBzugDwdZJ9swEz+UM3miV6regmUB5UACqV0TiHSdByTagDO2+MKYwyQUDHDeEnMBCaLPgbj3/kzrFxKpPOP2cILIhx6JaDaPrvE7ff99VKHbFZZ8JRSvpu5SEKxAKQZ8Ztrs0gDD83EuvfkQeru7LkwIPspV6tepHc+md7Lp8iMKSEssefUlbdyXtsuA9vsjU9wPNUSKJPoCq/nUUsAD/6Jvje9AjKb0AQH+HYqE9zy7mtqJ3qJ1R8sAQQvdRASbRQIDAQAB
+        -----END PUBLIC KEY-----
+    volumes:
+      - ./_volumes/entando7.4/cds-storage/t1:/entando-data
+    ports:
+      - 18081:8080
+      - 38081:8081
+    restart: unless-stopped
+
+  cds-t2:
+    image: entando/cds:1.0.4-fix.1
+    hostname: cds-t2
+    environment:
+      - CORS_ALLOWED_ORIGIN_END_WITH=.entando.local
+      - CORS_ALLOWED_ORIGIN=All
+      - RUST_LOG=actix_web=debug,actix_server=debug,actix_web_middleware_keycloak_auth=debug
+      - RUST_BACKTRACE=1
+      - KEYCLOAK_PUBLIC_KEY= |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAh5hNm79eMIr4pUXg8Q3hXP+sCBqb6aaWg+4UNpy+BUjU8zUqWT7wm7ETjFEPaPvAaOtQHd2lEhXcTLGGPDBfD1PG1t7S63z2iunej/tlDwI7gLZb9CaXKfiYBRpJEwIcohbqC1gW7h+z7FLeEulWCg5GhvTO+0X9hZNoEEtZbq//B5ke4X3TzY+I/9uyd0Knaoh7JLv30+gkSWpitFHX9hdY33kLVbafssouNGXfg2fZRC14ZBP8CBc41EpFDMdPtcQkaueoWDIGOAlT4GVg8PH/NhM9ALNWyO4/xPBd5AxIA2fvx2WJY5kIR+ArksAjWznHSG9ngfyLsTtjYv9QrwIDAQAB
+        -----END PUBLIC KEY-----
+    volumes:
+      - ./_volumes/entando7.4/cds-storage/t2:/entando-data
+    ports:
+      - 18082:8080
+      - 38082:8081
+    restart: unless-stopped
+
+  cds-t3:
+    image: entando/cds:1.0.4-fix.1
+    hostname: cds-t3
+    environment:
+      - CORS_ALLOWED_ORIGIN_END_WITH=.entando.local
+      - CORS_ALLOWED_ORIGIN=All
+      - RUST_LOG=actix_web=debug,actix_server=debug,actix_web_middleware_keycloak_auth=debug
+      - RUST_BACKTRACE=1
+      - KEYCLOAK_PUBLIC_KEY= |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgkQznt0GwkP3GFpuhBVJfUiXrePniP2FnibvaFOpMYg6KkRcHEk0L/bCeHpP9YNArFf8Mcpij/C/Fjf83svmx6dt1iFnzVXXgF6cPOXsDZmN479BZiTsE29BY9NZHXJinhShrQSLabF/pdKTy/sVWSgSTH9D7yDMw00flFm0sC7dQcLb303ndX3WJ1KQwifA9ttxWMir+XS3/vAWU9cIvHclTl11dandFh3eE4YOD4jUjvyI3na3+VWqEzEgoXBuN98yjLnSHSHrw4j7ZDmjLzsmhEnbT9Lrukf/RbSYKSllHWcZ0u+UziA4GUBThT9n/VYsKbjmJ2gkJSzmJ9d8CQIDAQAB
+        -----END PUBLIC KEY-----
+    volumes:
+      - ./_volumes/entando7.4/cds-storage/t3:/entando-data
+    ports:
+      - 18083:8080
+      - 38083:8081
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.29.0
+    hostname: nginx
+    depends_on:
+      - keycloak
+      - app-builder
+      - cds
+      - cds-t1
+      - cds-t2
+      - cds-t3
+    volumes:
+      - ./_nginx/nginx-entando7.4.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 80:80
+    restart: unless-stopped

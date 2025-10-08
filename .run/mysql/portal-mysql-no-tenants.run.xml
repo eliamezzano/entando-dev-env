@@ -11,7 +11,7 @@
               <entry key="SERVDB_DRIVER" value="mysql" />
               <entry key="CDS_ENABLED" value="false" />
               <entry key="CDS_PATH" value="/api/v1" />
-              <entry key="CDS_PRIVATE_URL" value="http://localhost:18080/" />
+              <entry key="CDS_PRIVATE_URL" value="http://172.17.0.1:18080/" />
               <entry key="CDS_PUBLIC_PATH" value="/public" />
               <entry key="CDS_PUBLIC_URL" value="http://portal.entando.local/cds" />
               <entry key="ENTANDO_TENANTS" value="[]" />
@@ -24,6 +24,8 @@
               <entry key="REDIS_ACTIVE" value="false" />
               <entry key="REDIS_ADDRESS" value="redis://172.17.0.1:16379" />
               <entry key="REDIS_SESSION_ACTIVE" value="false" />
+              <entry key="LOG_LEVEL" value="INFO" />
+              <entry key="ROOT_LOG_LEVEL" value="INFO" />
             </map>
           </option>
           <option name="jreName" value="#USE_PROJECT_JDK" />
@@ -76,19 +78,19 @@
               <option value="-DskipDatabaseImage=false" />
               <option value="-Dprofile.database.driverClassName=com.mysql.cj.jdbc.Driver" />
               <option value="-Dportdb.jndi=java:/jdbc/servDataSource" />
-              <option value="-Dportdb.url=jdbc:mysql://localhost:13306/port" />
+              <option value="-Dportdb.url=jdbc:mysql://172.17.0.1:13306/port" />
               <option value="-Dportdb.username=root" />
               <option value="-Dportdb.password=password" />
               <option value="-Dportdb.driverClassName=com.mysql.cj.jdbc.Driver" />
               <option value="-DportDataSourceClassName=com.mysql.cj.jdbc.Driver" />
               <option value="-Dservdb.jndi=java:/jdbc/portDataSource" />
-              <option value="-Dservdb.url=jdbc:mysql://localhost:13306/serv" />
+              <option value="-Dservdb.url=jdbc:mysql://172.17.0.1:13306/serv" />
               <option value="-Dservdb.username=root" />
               <option value="-Dservdb.password=password" />
               <option value="-Dservdb.driverClassName=com.mysql.cj.jdbc.Driver" />
               <option value="-DservDataSourceClassName=com.mysql.cj.jdbc.Driver" />
               <option value="-DredisActive=false" />
-              <option value="-DredisAddress=redis://localhost:16379" />
+              <option value="-DredisAddress=redis://172.17.0.1:16379" />
               <option value="-DSolarAddress=" />
               <option value="-Dfile.upload.maxSize=25000000" />
               <option value="-Dorg.entando.deepDebug=" />
