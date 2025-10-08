@@ -1,0 +1,65 @@
+.idea
+
+##############################
+# Keycloak DB files - START
+##############################
+
+_keycloak/deployments/*.deployed
+_volumes/**/keycloak-db/*
+_volumes/**/keycloak-db/!placeholder
+
+##############################
+# Keycloak DB files - END
+##############################
+
+##############################
+# Postgres Data files - START
+##############################
+
+_volumes/**/postgres-data
+
+##############################
+# Postgres Data files - END
+##############################
+
+##############################
+# MySQL Data files - START
+##############################
+
+_volumes/**/mysql-data/*
+_volumes/**/mysql-data/!placeholder
+
+##############################
+# MySQL Data files - END
+##############################
+
+##############################
+# CDS Data files - START
+##############################
+
+_volumes/**/cds-storage/!placeholder
+_volumes/**/cds-storage/default/*
+_volumes/**/cds-storage/default/!placeholder
+_volumes/**/cds-storage/t1/*
+_volumes/**/cds-storage/t1/!placeholder
+_volumes/**/cds-storage/t2/*
+_volumes/**/cds-storage/t2/!placeholder
+_volumes/**/cds-storage/t3/*
+_volumes/**/cds-storage/t3/!placeholder
+
+##############################
+# CDS Data files - END
+##############################
+
+##############################
+# Redis Data files - START
+##############################
+
+_volumes/**/redis-data/*
+_volumes/**/redis-data/!placeholder
+
+##############################
+# Redis Data files - END
+##############################
+
+
